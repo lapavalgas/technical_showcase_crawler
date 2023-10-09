@@ -1,0 +1,62 @@
+https://manpages.courier-mta.org/
+
+docker build . -t challenge/backend
+docker run -e BASE_URL=https://manpages.courier-mta.org/ -p 4567:4567 --rm challenge/backend
+
+await fetch("http://localhost:4567/crawl", {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({'keyword': 'security'})
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch((error) => console.error('Erro:', error));
+
+await fetch("http://localhost:4567/crawl/:id", {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch((error) => console.error('Erro:', error));
+
+#######################
+### Crypy / Decrypt ###
+#######################
+
+const crypt = (salt, text) => {
+  const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
+  const byteHex = (n) => ("0" + Number(n).toString(16)).substr(-2);
+  const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
+
+  return text
+    .split("")
+    .map(textToChars)
+    .map(applySaltToChar)
+    .map(byteHex)
+    .join("");
+};
+
+const decrypt = (salt, encoded) => {
+  const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
+  const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
+  return encoded
+    .match(/.{1,2}/g)
+    .map((hex) => parseInt(hex, 16))
+    .map(applySaltToChar)
+    .map((charCode) => String.fromCharCode(charCode))
+    .join("");
+};
+const salt = 'open'
+
+const challengeCompany = decrypt(salt, '554c41462e347c606064672e3b3b6363633a756c61663a777b793b64603976663b7c7b7971')
+const challengeUrlTest = decrypt(salt, '7c6060642e3b3b7c7d667d7a733a756c66717a733a777b793b')
+const challengeUrlTestApp = decrypt(salt, '7c6060642e3b3b607167607564643a756c66717a733a777b792e202122233b')
+console.log(challengeCompany)
+console.log(challengeUrlTest)
+console.log(challengeUrlTestApp)
+
