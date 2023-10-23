@@ -7,6 +7,7 @@ import com.challenge.backend.service.CrawlApiService;
 import com.challenge.backend.service.CrawlApiServiceImpl;
 import com.challenge.backend.utils.CrawlConstants;
 import com.challenge.backend.utils.LogConstants;
+import spark.Spark;
 
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,29 @@ public class CrawlController {
             return GsonHelper.gson.toJson(list);
         });
 
+        final String allowedOrigin = "*";
+        Spark.options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+
+            return "OK";
+        });
+        Spark.before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", allowedOrigin);
+            response.header("Access-Control-Request-Method", "GET, POST, PUT, DELETE, OPTIONS");
+            response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        });
+
+        Spark.afterAfter((request, response) -> {
+            response.header("Access-Control-Allow-Origin", allowedOrigin);
+        });
     }
 }
 
